@@ -2,21 +2,14 @@ package bg.chat.server;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.Collections;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Arrays;
+import java.util.Collection;
 
 public class ClientHandler extends Thread {
     private final Socket socket;
 
-    private static Set<String> connectedUsernames = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     private DataOutputStream out = null;
-
-    void login(String username) {
-        connectedUsernames.add(username);
-        System.out.println("User " + username + " added!");
-    }
 
     ClientHandler(Socket socket) {
         this.socket = socket;
@@ -45,18 +38,28 @@ public class ClientHandler extends Thread {
                     socket.close();
                     return;
                 }
-                String[] parts = line.split(" ");
-                String command = parts[0];
-                switch (command) {
+                String[] lineData = line.split(" ");
+                String cmd = lineData[0];
+                System.out.println(Arrays.toString(lineData));
+                switch (cmd) {
                     case "LOGIN":
-                        login(parts[1]);
+                        ChatManager.getInstance().login(lineData[1]);
                         break;
                     case "LIST-USERS":
-                        writeLine(connectedUsernames.toString());
+                        Collection<String> usernames = ChatManager.getInstance().getAllUsers();
+                        sendUsersList(usernames);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    private void sendUsersList(Collection<String> usernames) throws IOException {
+        writeLine("LIST-USERS 0");
+        for (final String username : usernames) {
+            writeLine(username);
+        }
+        writeLine("LIST-USERS 1");
     }
 }
