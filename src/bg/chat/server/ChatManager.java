@@ -8,11 +8,12 @@ import java.util.Set;
 public class ChatManager {
     private static ChatManager instance = null;
 
-    private static Set<String> connectedUsernames = Collections.synchronizedSet(new HashSet<>());
+    private static Set<String> connectedUsernames;
 
     public synchronized static ChatManager getInstance() { //added synchronized after some research
         if (instance == null) {
             instance = new ChatManager();
+            connectedUsernames = Collections.synchronizedSet(new HashSet<>());
         }
         return instance;
     }
