@@ -14,7 +14,6 @@ public class User {
     }
 
     public void register() {
-        System.out.println(username + " " + password);
         try {
             BufferedWriter out = new BufferedWriter(new FileWriter(FILE_NAME, true));
             out.write(username + " " + password + "\n");
