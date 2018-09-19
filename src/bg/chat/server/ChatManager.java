@@ -10,7 +10,7 @@ public class ChatManager {
 
     private static Set<String> connectedUsernames;
 
-    public synchronized static ChatManager getInstance() { //added synchronized after some research
+    public synchronized static ChatManager getInstance() {
         if (instance == null) {
             instance = new ChatManager();
             connectedUsernames = Collections.synchronizedSet(new HashSet<>());
@@ -18,13 +18,20 @@ public class ChatManager {
         return instance;
     }
 
-    void login(String username) {
-        connectedUsernames.add(username);
-        System.out.println("User " + username + " added!");
+    boolean login(String username) {
+        if (isOnline(username)) {
+            return false;
+        } else {
+            connectedUsernames.add(username);
+            return true;
+        }
     }
-
 
     public Collection<String> getAllUsers() {
         return connectedUsernames;
+    }
+
+    public boolean isOnline(String username) {
+        return connectedUsernames.contains(username);
     }
 }
