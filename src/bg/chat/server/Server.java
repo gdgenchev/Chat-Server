@@ -12,7 +12,7 @@ public class Server {
         try(ServerSocket listener = new ServerSocket(Constants.PORT)) {
             while (true) {
                 Socket clientSocket = listener.accept();
-                new ClientHandler(clientSocket).start();
+                new SocketHandlingThread(clientSocket).start();
             }
         } catch (IOException e) {
             e.printStackTrace();
