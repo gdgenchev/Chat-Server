@@ -70,7 +70,7 @@ public class Client extends Thread {
                     String from = lineData[2];
                     if (state == 1) {
                         String receivedText = line.substring(cmd.length() + from.length() + 4);
-                        String message = "Message From: " + from
+                        String message = "From: " + from
                                 + "\n" + "Message: " + receivedText;
                         System.out.println(message);
                     } else if (state == 2) {
@@ -85,6 +85,8 @@ public class Client extends Thread {
 
     public static void main(String[] args) {
         Client client = new Client();
+        boolean connected = false;
+        boolean logged = false;
         while (true) {
             try {
                 Scanner sc = new Scanner(System.in);
@@ -93,10 +95,13 @@ public class Client extends Thread {
                 String cmd = lineData[0];
                 switch (cmd) {
                     case "connect":
-                        if (lineData.length == 3) {
+                        if (connected) {
+                            System.out.println("Already connected!");
+                        } else if (lineData.length == 3) {
                             client.connectToServer(lineData[1], Integer.parseInt(lineData[2]));
                             client.start();
-                            System.out.println("Successfully connected to server");
+                            System.out.println("Successfully connected to server!");
+                            connected = true;
                         } else {
                             System.out.println("Usage: connect <host> <port>");
                         }
@@ -113,6 +118,7 @@ public class Client extends Thread {
                             if (FileUtils.isRegistered(lineData[1], lineData[2].toCharArray())) {
                                 client.username = lineData[1];
                                 client.writeLine("LOGIN " + client.username);
+                                logged = true;
                             }
                         } else {
                             System.out.println("Usage: login <username> <password>");
@@ -124,10 +130,14 @@ public class Client extends Thread {
                         s1.acquire();
                         break;
                     case "send":
-                        String receiver = lineData[1];
-                        String message = line.substring(cmd.length() + lineData[1].length() + 2);
-                        if (lineData.length >= 3) {
-                            client.writeLine("SEND " + client.username + " " + receiver + " " + message);
+                        if (logged) {
+                            String receiver = lineData[1];
+                            String message = line.substring(cmd.length() + lineData[1].length() + 2);
+                            if (lineData.length >= 3) {
+                                client.writeLine("SEND " + client.username + " " + receiver + " " + message);
+                            }
+                        } else {
+                            System.out.println("You can't send messages before login!");
                         }
                         break;
                 }
