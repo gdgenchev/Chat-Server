@@ -9,9 +9,14 @@ import java.util.concurrent.Semaphore;
 
 public class Client extends Thread {
     private Socket socket;
+
     private DataOutputStream out;
+
     private BufferedReader in;
+
     private static Semaphore s1;
+
+    private  String username;
 
     private Client() {
         s1 = new Semaphore(1);
@@ -38,7 +43,14 @@ public class Client extends Thread {
                 String line = in.readLine();
                 String[] lineData = line.split(" ");
                 String cmd = lineData[0];
-                if (line.equalsIgnoreCase("list-users 0")) {
+                if (cmd.equalsIgnoreCase("login")) {
+                    if (lineData[1].equals("1")) {
+                        username = lineData[2];
+                        System.out.println("Successfully logged in!");
+                    } else {
+                        System.out.println("Username already logged in!");
+                    }
+                }else if (line.equalsIgnoreCase("list-users 0")) {
                     boolean has = false;
                     while(!line.equalsIgnoreCase("list-users 1")) {
                         line = in.readLine();
@@ -54,6 +66,16 @@ public class Client extends Thread {
                         System.out.println("No online users!");
                     }
                     s1.release();
+                } else if (cmd.equalsIgnoreCase("SEND")) {
+                    System.out.println(username);
+                    System.out.println("HMMM RECEIVED STH");
+                    if (lineData[1].equals("1")) {
+                        if (lineData[2].equals(username)) {
+                            System.out.println(line.substring(username.length() + 2));
+                        }
+                    } else if (lineData[1].equals("2")) {
+                        System.out.println("The user is not online");
+                    }
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -66,8 +88,8 @@ public class Client extends Thread {
         while (true) {
             try {
                 Scanner sc = new Scanner(System.in);
-                String commandLine = sc.nextLine();
-                String[] lineData = commandLine.split(" ");
+                String line = sc.nextLine();
+                String[] lineData = line.split(" ");
                 String cmd = lineData[0];
                 switch (cmd) {
                     case "connect":
@@ -89,9 +111,7 @@ public class Client extends Thread {
                     case "login":
                         if (lineData.length == 3) {
                             if (FileWriterUtils.isRegistered(lineData[1], lineData[2].toCharArray())) {
-                                System.out.println("Successfully logged in!");
                                 client.writeLine("LOGIN " + lineData[1]);
-                               // FileWriterUtils.registerUserToFile(username, password);
                             }
                         } else {
                             System.out.println("Usage: login <username> <password>");
@@ -103,8 +123,9 @@ public class Client extends Thread {
                         s1.acquire();
                         break;
                     case "send":
-                        if (lineData.length == 3) {
-                            client.writeLine("SEND " + lineData[1] + " " + lineData[2]);
+                        if (lineData.length >= 3) {
+                            client.writeLine("SEND " + lineData[1] + " " + line.substring(
+                                    cmd.length() + lineData[1].length() + 2));
                         }
                         break;
                 }
