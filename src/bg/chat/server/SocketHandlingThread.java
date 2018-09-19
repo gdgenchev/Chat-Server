@@ -4,17 +4,17 @@ import java.io.*;
 import java.net.Socket;
 import java.util.Collection;
 
-public class ClientHandler extends Thread {
+public class SocketHandlingThread extends Thread {
     private final Socket socket;
 
 
     private DataOutputStream out = null;
 
-    ClientHandler(Socket socket) {
+    SocketHandlingThread(Socket socket) {
         this.socket = socket;
     }
 
-    private void writeLine(String line) throws IOException {
+    public void writeLine(String line) throws IOException {
         this.out.writeBytes(line + "\n");
         out.flush();
     }
@@ -42,18 +42,21 @@ public class ClientHandler extends Thread {
                 switch (cmd) {
                     case "LOGIN":
                         String username = lineData[1];
-                        if (ChatManager.getInstance().login(username)) {
-                            writeLine("LOGIN 1 " + username);
+                        if (ChatManager.getInstance().login(username, this)) {
+                            writeLine("LOGIN 1");
                         } else {
                             writeLine("LOGIN 2");
                         }
                         break;
                     case "LIST-USERS":
-                        Collection<String> usernames = ChatManager.getInstance().getAllUsers();
+                        Collection<String> usernames = ChatManager.getInstance().getAllUsernames();
                         sendUsersList(usernames);
                         break;
                     case "SEND":
-                        sendMessageToUser(lineData[1], line.substring(cmd.length() + lineData[1].length() + 2));
+                        if (!ChatManager.getInstance().sendMessageToUser(lineData[1],
+                                lineData[2], line.substring(cmd.length() + lineData[1].length() + lineData[2].length() + 3))) {
+                            writeLine("SEND 2");
+                        }
                         break;
                 }
             } catch (IOException e) {
@@ -70,13 +73,4 @@ public class ClientHandler extends Thread {
         writeLine("LIST-USERS 1");
     }
 
-    private synchronized void sendMessageToUser(String username, String message) throws IOException {
-        System.out.println(username);
-        System.out.println(message);
-        if (ChatManager.getInstance().isOnline(username)) {
-            writeLine("SEND 1 " + username + " " + message);
-        } else {
-            writeLine("SEND 2 " + username);
-        }
-    }
 }
