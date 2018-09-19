@@ -1,6 +1,6 @@
 package bg.chat.client;
 
-import bg.chat.common.FileWriterUtils;
+import bg.chat.common.FileUtils;
 
 import java.io.*;
 import java.net.Socket;
@@ -12,7 +12,7 @@ public class Client extends Thread {
 
     private DataOutputStream out;
 
-    private BufferedReader in;
+    private BufferedReader brinp;
 
     private static Semaphore s1;
 
@@ -26,7 +26,7 @@ public class Client extends Thread {
         try {
             this.socket = new Socket(host,port);
             this.out = new DataOutputStream(socket.getOutputStream());
-            this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            this.brinp = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -38,22 +38,22 @@ public class Client extends Thread {
     }
 
     public void run () {
-        while (true) {
-            try {
-                String line = in.readLine();
+        try {
+            while (true) {
+                String line = brinp.readLine();
                 String[] lineData = line.split(" ");
                 String cmd = lineData[0];
+                int state = Integer.parseInt(lineData[1]);
                 if (cmd.equalsIgnoreCase("login")) {
-                    if (lineData[1].equals("1")) {
-                        username = lineData[2];
+                    if (state == 1) {
                         System.out.println("Successfully logged in!");
-                    } else {
-                        System.out.println("Username already logged in!");
+                    } else if (state == 2) {
+                        System.out.println("You are already logged in from somewhere!");
                     }
-                }else if (line.equalsIgnoreCase("list-users 0")) {
+                } else if (line.equalsIgnoreCase("list-users 0")) {
                     boolean has = false;
                     while(!line.equalsIgnoreCase("list-users 1")) {
-                        line = in.readLine();
+                        line = brinp.readLine();
                         if (!line.equalsIgnoreCase("list-users 1")) {
                             if (!has) {
                                 System.out.println("Connected users:");
@@ -66,20 +66,20 @@ public class Client extends Thread {
                         System.out.println("No online users!");
                     }
                     s1.release();
-                } else if (cmd.equalsIgnoreCase("SEND")) {
-                    System.out.println(username);
-                    System.out.println("HMMM RECEIVED STH");
-                    if (lineData[1].equals("1")) {
-                        if (lineData[2].equals(username)) {
-                            System.out.println(line.substring(username.length() + 2));
-                        }
-                    } else if (lineData[1].equals("2")) {
+                } else if (cmd.equalsIgnoreCase("send")) {
+                    String from = lineData[2];
+                    if (state == 1) {
+                        String receivedText = line.substring(cmd.length() + from.length() + 4);
+                        String message = "Message From: " + from
+                                + "\n" + "Message: " + receivedText;
+                        System.out.println(message);
+                    } else if (state == 2) {
                         System.out.println("The user is not online");
                     }
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -103,15 +103,16 @@ public class Client extends Thread {
                         break;
                     case "register":
                         if (lineData.length == 3) {
-                            FileWriterUtils.register(lineData[1], lineData[2].toCharArray());
+                            FileUtils.register(lineData[1], lineData[2].toCharArray());
                         } else {
                             System.out.println("Usage: register <username> <password>");
                         }
                         break;
                     case "login":
                         if (lineData.length == 3) {
-                            if (FileWriterUtils.isRegistered(lineData[1], lineData[2].toCharArray())) {
-                                client.writeLine("LOGIN " + lineData[1]);
+                            if (FileUtils.isRegistered(lineData[1], lineData[2].toCharArray())) {
+                                client.username = lineData[1];
+                                client.writeLine("LOGIN " + client.username);
                             }
                         } else {
                             System.out.println("Usage: login <username> <password>");
@@ -123,9 +124,10 @@ public class Client extends Thread {
                         s1.acquire();
                         break;
                     case "send":
+                        String receiver = lineData[1];
+                        String message = line.substring(cmd.length() + lineData[1].length() + 2);
                         if (lineData.length >= 3) {
-                            client.writeLine("SEND " + lineData[1] + " " + line.substring(
-                                    cmd.length() + lineData[1].length() + 2));
+                            client.writeLine("SEND " + client.username + " " + receiver + " " + message);
                         }
                         break;
                 }
