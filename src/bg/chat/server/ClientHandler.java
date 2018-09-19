@@ -2,7 +2,6 @@ package bg.chat.server;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.Arrays;
 import java.util.Collection;
 
 public class ClientHandler extends Thread {
@@ -40,14 +39,22 @@ public class ClientHandler extends Thread {
                 }
                 String[] lineData = line.split(" ");
                 String cmd = lineData[0];
-                System.out.println(Arrays.toString(lineData));
                 switch (cmd) {
                     case "LOGIN":
-                        ChatManager.getInstance().login(lineData[1]);
+                        String username = lineData[1];
+                        if (ChatManager.getInstance().login(username)) {
+                            writeLine("LOGIN 1 " + username);
+                        } else {
+                            writeLine("LOGIN 2");
+                        }
                         break;
                     case "LIST-USERS":
                         Collection<String> usernames = ChatManager.getInstance().getAllUsers();
                         sendUsersList(usernames);
+                        break;
+                    case "SEND":
+                        sendMessageToUser(lineData[1], line.substring(cmd.length() + lineData[1].length() + 2));
+                        break;
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -61,5 +68,15 @@ public class ClientHandler extends Thread {
             writeLine(username);
         }
         writeLine("LIST-USERS 1");
+    }
+
+    private synchronized void sendMessageToUser(String username, String message) throws IOException {
+        System.out.println(username);
+        System.out.println(message);
+        if (ChatManager.getInstance().isOnline(username)) {
+            writeLine("SEND 1 " + username + " " + message);
+        } else {
+            writeLine("SEND 2 " + username);
+        }
     }
 }
