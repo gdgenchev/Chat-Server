@@ -2,14 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c1176368-4bf3-471a-8c29-be8a6016c85b" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Chat Server.iml" beforeDir="false" afterPath="$PROJECT_DIR$/Chat Server.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/Chat Server/bg/chat/client/Client.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Chat Server/bg/chat/client/Client.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/Chat Server/bg/chat/server/ClientHandler.class" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/Chat Server/bg/chat/server/Server.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Chat Server/bg/chat/server/Server.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/bg/chat/common/ChatRoomsList.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/bg/chat/server/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/bg/chat/server/Server.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -46,14 +43,14 @@
           <entry key="dummy" value="31" />
           <entry key="java" value="6709" />
           <entry key="md" value="413" />
-          <entry key="txt" value="492" />
+          <entry key="txt" value="562" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="JAVA" value="6709" />
           <entry key="Markdown" value="413" />
-          <entry key="PLAIN_TEXT" value="523" />
+          <entry key="PLAIN_TEXT" value="593" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.spring.boot.mvc.usages" />
@@ -133,7 +130,7 @@
         <entry file="file://$PROJECT_DIR$/src/bg/chat/server/Server.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="342">
-              <caret line="19" column="5" lean-forward="true" selection-start-line="19" selection-start-column="5" selection-end-line="19" selection-end-column="5" />
+              <caret line="19" column="5" selection-start-line="19" selection-start-column="5" selection-end-line="19" selection-end-column="5" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -144,8 +141,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/bg/chat/client/Client.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="273">
-              <caret line="73" column="25" lean-forward="true" selection-start-line="73" selection-start-column="25" selection-end-line="73" selection-end-column="25" />
+            <state relative-caret-position="435">
+              <caret line="82" column="9" lean-forward="true" selection-start-line="82" selection-start-column="9" selection-end-line="82" selection-end-column="9" />
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="e#394#395#0" expanded="true" />
@@ -159,7 +156,7 @@
         <entry file="file://$PROJECT_DIR$/src/bg/chat/server/User.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="234">
-              <caret line="15" lean-forward="true" selection-start-line="15" selection-end-line="15" />
+              <caret line="15" selection-start-line="15" selection-end-line="15" />
             </state>
           </provider>
         </entry>
@@ -168,7 +165,7 @@
         <entry file="file://$PROJECT_DIR$/src/bg/chat/server/ChatManager.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="417">
-              <caret line="46" lean-forward="true" selection-start-line="46" selection-end-line="46" />
+              <caret line="46" selection-start-line="46" selection-end-line="46" />
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="e#270#271#0" expanded="true" />
@@ -290,13 +287,14 @@
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1537351918093" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1537352176089" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.0" />
+    <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Ignored.Files" />
   </component>
   <component name="RecentsManager">
     <key name="CreateClassDialog.RecentsKey">
@@ -365,7 +363,7 @@
       <updated>1537252943037</updated>
       <workItem from="1537252947383" duration="13360000" />
       <workItem from="1537304140111" duration="9274000" />
-      <workItem from="1537341631335" duration="9864000" />
+      <workItem from="1537341631335" duration="10118000" />
     </task>
     <task id="LOCAL-00001" summary="Receive login status from server">
       <created>1537345126949</created>
@@ -430,11 +428,32 @@
       <option name="project" value="LOCAL" />
       <updated>1537351871587</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="Fix">
+      <created>1537351971832</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1537351971832</updated>
+    </task>
+    <task id="LOCAL-00011" summary="Delete unused class">
+      <created>1537351998818</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1537351998818</updated>
+    </task>
+    <task id="LOCAL-00012" summary="Update README">
+      <created>1537352016186</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1537352016186</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="32498000" />
+    <option name="totallyTimeSpent" value="32752000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="25" width="1920" height="990" extended-state="6" />
@@ -517,7 +536,11 @@
     <MESSAGE value="Add send message feature" />
     <MESSAGE value="Change name" />
     <MESSAGE value="Add send message feature. Some bug fixes" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add send message feature. Some bug fixes" />
+    <MESSAGE value="Rename" />
+    <MESSAGE value="Fix" />
+    <MESSAGE value="Delete unused class" />
+    <MESSAGE value="Update README" />
+    <option name="LAST_COMMIT_MESSAGE" value="Update README" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/src/bg/chat/menu/Menu.java" />
@@ -553,14 +576,14 @@
     <entry file="file://$PROJECT_DIR$/src/bg/chat/server/User.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="234">
-          <caret line="15" lean-forward="true" selection-start-line="15" selection-end-line="15" />
+          <caret line="15" selection-start-line="15" selection-end-line="15" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/bg/chat/server/Server.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="342">
-          <caret line="19" column="5" lean-forward="true" selection-start-line="19" selection-start-column="5" selection-end-line="19" selection-end-column="5" />
+          <caret line="19" column="5" selection-start-line="19" selection-start-column="5" selection-end-line="19" selection-end-column="5" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
@@ -580,7 +603,7 @@
     <entry file="file://$PROJECT_DIR$/src/bg/chat/server/ChatManager.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="417">
-          <caret line="46" lean-forward="true" selection-start-line="46" selection-end-line="46" />
+          <caret line="46" selection-start-line="46" selection-end-line="46" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="e#270#271#0" expanded="true" />
@@ -615,8 +638,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/bg/chat/client/Client.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="273">
-          <caret line="73" column="25" lean-forward="true" selection-start-line="73" selection-start-column="25" selection-end-line="73" selection-end-column="25" />
+        <state relative-caret-position="435">
+          <caret line="82" column="9" lean-forward="true" selection-start-line="82" selection-start-column="9" selection-end-line="82" selection-end-column="9" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="e#394#395#0" expanded="true" />
