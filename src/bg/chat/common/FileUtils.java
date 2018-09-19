@@ -2,13 +2,11 @@ package bg.chat.common;
 import java.util.Arrays;
 import java.io.*;
 
-import static bg.chat.common.Constants.FILE_NAME;
-
-public class FileWriterUtils {
+public class FileUtils {
 
     public static void register(String username, char[] password) {
         try {
-            BufferedWriter out = new BufferedWriter(new FileWriter(FILE_NAME, true));
+            BufferedWriter out = new BufferedWriter(new FileWriter(Constants.FILE_NAME, true));
             out.write(username + " " + password + "\n");
             out.close();
         } catch (IOException e) {
@@ -18,7 +16,7 @@ public class FileWriterUtils {
 
     public static boolean isRegistered(String username, char[] password) {
         try {
-            BufferedReader in = new BufferedReader(new FileReader(FILE_NAME));
+            BufferedReader in = new BufferedReader(new FileReader(Constants.FILE_NAME));
             String line;
             while ((line = in.readLine()) != null) {
                 final String[] credentials = line.split(" ");
