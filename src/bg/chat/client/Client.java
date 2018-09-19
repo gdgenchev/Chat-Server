@@ -1,9 +1,20 @@
 package bg.chat.client;
 
-import bg.chat.common.FileUtils;
+import bg.chat.client.command.Command;
+import bg.chat.client.command.CommandCreator;
+import bg.chat.client.command.CommandType;
+import bg.chat.client.command.exceptions.AlreadyConnectedException;
+import bg.chat.client.command.exceptions.NotLoggedInException;
+import bg.chat.client.command.exceptions.WrongUsageException;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.Semaphore;
 
@@ -18,23 +29,69 @@ public class Client extends Thread {
 
     private  String username;
 
+    private boolean connected;
+
+    private boolean logged;
+
     private Client() {
+        connected = false;
+        logged = false;
+        username = null;
         s1 = new Semaphore(1);
     }
 
-    private void connectToServer(String host, int port) {
+    public void connectToServer(String host, int port) {
         try {
             this.socket = new Socket(host,port);
             this.out = new DataOutputStream(socket.getOutputStream());
             this.brinp = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            setConnected(true);
+            this.start();
+            System.out.println("Successfully connected to server!");
+        } catch (IOException e) {
+            System.out.println("Failed to connect to server!");
+        }
+    }
+
+    public void writeLine(String line) {
+        try {
+            this.out.writeBytes(line + "\n");
+            out.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void writeLine(String line) throws IOException {
-        this.out.writeBytes(line + "\n");
-        out.flush();
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setConnected(boolean connected) {
+        this.connected = connected;
+    }
+
+    public void setLogged(boolean logged) {
+        this.logged = logged;
+    }
+
+    public boolean isConnected() {
+        return connected;
+    }
+
+    public boolean isLogged() {
+        return logged;
+    }
+
+    public void blockMainThread() {
+        try {
+            s1.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public void run () {
@@ -67,8 +124,8 @@ public class Client extends Thread {
                     }
                     s1.release();
                 } else if (cmd.equalsIgnoreCase("send")) {
-                    String from = lineData[2];
                     if (state == 1) {
+                        String from = lineData[2];
                         String receivedText = line.substring(cmd.length() + from.length() + 4);
                         String message = "From: " + from
                                 + "\n" + "Message: " + receivedText;
@@ -85,64 +142,20 @@ public class Client extends Thread {
 
     public static void main(String[] args) {
         Client client = new Client();
-        boolean connected = false;
-        boolean logged = false;
         while (true) {
+            Scanner sc = new Scanner(System.in);
+            String line = sc.nextLine();
+            List<String> lineData = new ArrayList<>(Arrays.asList(line.split(" ")));
+            String cmd = lineData.get(0);
+            lineData.remove(0);
+            CommandType cmdType = CommandType.fromString(cmd);
+            Command command = CommandCreator.create(cmdType, lineData);
             try {
-                Scanner sc = new Scanner(System.in);
-                String line = sc.nextLine();
-                String[] lineData = line.split(" ");
-                String cmd = lineData[0];
-                switch (cmd) {
-                    case "connect":
-                        if (connected) {
-                            System.out.println("Already connected!");
-                        } else if (lineData.length == 3) {
-                            client.connectToServer(lineData[1], Integer.parseInt(lineData[2]));
-                            client.start();
-                            System.out.println("Successfully connected to server!");
-                            connected = true;
-                        } else {
-                            System.out.println("Usage: connect <host> <port>");
-                        }
-                        break;
-                    case "register":
-                        if (lineData.length == 3) {
-                            FileUtils.register(lineData[1], lineData[2].toCharArray());
-                        } else {
-                            System.out.println("Usage: register <username> <password>");
-                        }
-                        break;
-                    case "login":
-                        if (lineData.length == 3) {
-                            if (FileUtils.isRegistered(lineData[1], lineData[2].toCharArray())) {
-                                client.username = lineData[1];
-                                client.writeLine("LOGIN " + client.username);
-                                logged = true;
-                            }
-                        } else {
-                            System.out.println("Usage: login <username> <password>");
-                        }
-                        break;
-                    case "list-users":
-                        //TODO: add support for list-users chatRoom
-                        client.writeLine("LIST-USERS");
-                        s1.acquire();
-                        break;
-                    case "send":
-                        if (logged) {
-                            String receiver = lineData[1];
-                            String message = line.substring(cmd.length() + lineData[1].length() + 2);
-                            if (lineData.length >= 3) {
-                                client.writeLine("SEND " + client.username + " " + receiver + " " + message);
-                            }
-                        } else {
-                            System.out.println("You can't send messages before login!");
-                        }
-                        break;
+                if (command != null) {
+                    command.execute(client);
                 }
-            } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
+            } catch (WrongUsageException | NotLoggedInException | AlreadyConnectedException e) {
+                System.out.println(e.getMessage());
             }
         }
     }
