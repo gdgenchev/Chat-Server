@@ -1,15 +1,15 @@
 package bg.chat.server;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ChatManager {
     private static ChatManager instance = null;
 
-    private static Map<String, User> connectedUsers;
+    private Map<String, User> connectedUsers;
 
     private ChatManager() {
-        instance = new ChatManager();
         connectedUsers = new ConcurrentHashMap<>();
     }
 
@@ -21,18 +21,26 @@ public class ChatManager {
     }
 
     boolean login(String username, SocketHandlingThread socket) {
-        if (isOnline(username)) {
+        User user = this.connectedUsers.get(username);
+        if (user != null) {
             return false;
         }
-        connectedUsers.put(username, new User(username, socket));
+        user = new User(username, socket);
+        this.connectedUsers.put(username, user);
         return true;
     }
 
     public Collection<String> getAllUsernames() {
-        return connectedUsers.keySet();
+        return this.connectedUsers.keySet();
     }
 
-    public boolean isOnline(String username) {
-        return connectedUsers.get(username) != null;
+
+    public boolean sendMessageToUser(String from, String to, String message) throws IOException {
+        User user = this.connectedUsers.get(to);
+        if (user == null) {
+            return false;
+        }
+        user.getSocket().writeLine("SEND 1 " + from + " " + message);
+        return true;
     }
 }
