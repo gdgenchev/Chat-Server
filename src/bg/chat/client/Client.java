@@ -1,6 +1,6 @@
 package bg.chat.client;
 
-import bg.chat.common.User;
+import bg.chat.common.FileWriterUtils;
 
 import java.io.*;
 import java.net.Socket;
@@ -67,12 +67,12 @@ public class Client extends Thread {
             try {
                 Scanner sc = new Scanner(System.in);
                 String commandLine = sc.nextLine();
-                String[] parts = commandLine.split(" ");
-                String cmd = parts[0];
+                String[] lineData = commandLine.split(" ");
+                String cmd = lineData[0];
                 switch (cmd) {
                     case "connect":
-                        if (parts.length == 3) {
-                            client.connectToServer(parts[1], Integer.parseInt(parts[2]));
+                        if (lineData.length == 3) {
+                            client.connectToServer(lineData[1], Integer.parseInt(lineData[2]));
                             client.start();
                             System.out.println("Successfully connected to server");
                         } else {
@@ -80,17 +80,18 @@ public class Client extends Thread {
                         }
                         break;
                     case "register":
-                        if (parts.length == 3) {
-                            new User(parts[1], parts[2]).register();
+                        if (lineData.length == 3) {
+                            FileWriterUtils.register(lineData[1], lineData[2].toCharArray());
                         } else {
                             System.out.println("Usage: register <username> <password>");
                         }
                         break;
                     case "login":
-                        if (parts.length == 3) {
-                            if (new User(parts[1], parts[2]).isRegistered()) {
+                        if (lineData.length == 3) {
+                            if (FileWriterUtils.isRegistered(lineData[1], lineData[2].toCharArray())) {
                                 System.out.println("Successfully logged in!");
-                                client.writeLine("LOGIN " + parts[1]);
+                                client.writeLine("LOGIN " + lineData[1]);
+                               // FileWriterUtils.registerUserToFile(username, password);
                             }
                         } else {
                             System.out.println("Usage: login <username> <password>");
@@ -102,8 +103,8 @@ public class Client extends Thread {
                         s1.acquire();
                         break;
                     case "send":
-                        if (parts.length == 3) {
-                            client.writeLine("SEND " + parts[1] + " " + parts[2]);
+                        if (lineData.length == 3) {
+                            client.writeLine("SEND " + lineData[1] + " " + lineData[2]);
                         }
                         break;
                 }
