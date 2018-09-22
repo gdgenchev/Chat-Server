@@ -2,11 +2,11 @@ package bg.chat.server;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.Collection;
 
 public class SocketHandlingThread extends Thread {
     private final Socket socket;
-
 
     private DataOutputStream out = null;
 
@@ -14,7 +14,7 @@ public class SocketHandlingThread extends Thread {
         this.socket = socket;
     }
 
-    public void writeLine(String line) throws IOException {
+    public synchronized void writeLine(String line) throws IOException {
         this.out.writeBytes(line + "\n");
         out.flush();
     }
@@ -29,14 +29,15 @@ public class SocketHandlingThread extends Thread {
         } catch (IOException e) {
             return;
         }
-        String line;
+        String line = null;
         while (true) {
             try {
                 line = brinp.readLine();
-                if ((line == null)) {
+                if (line == null) {
                     socket.close();
                     return;
                 }
+                System.out.println(line);
                 String[] lineData = line.split(" ");
                 String cmd = lineData[0];
                 switch (cmd) {
@@ -53,13 +54,25 @@ public class SocketHandlingThread extends Thread {
                         sendUsersList(usernames);
                         break;
                     case "SEND":
-                        if (!ChatManager.getInstance().sendMessageToUser(lineData[1],
-                                lineData[2], line.substring(cmd.length() + lineData[1].length() + lineData[2].length() + 3))) {
+                        if (!ChatManager.getInstance().sendMessageToUser(
+                                lineData[1], lineData[2],
+                                line.substring(
+                                        cmd.length()
+                                                + lineData[1].length()
+                                                + lineData[2].length() + 3))) {
                             writeLine("SEND 2");
                         }
                         break;
+                    case "QUIT":
+                        ChatManager.getInstance().disconnectUser(lineData[1]);
+                        writeLine("QUIT");
+                        break;
                 }
-            } catch (IOException e) {
+            } catch (SocketException e) {
+                //Assume client disconnected
+                //Already handled disconnection from QUIT
+                return;
+           } catch (IOException e) {
                 e.printStackTrace();
             }
         }

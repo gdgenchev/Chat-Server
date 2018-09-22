@@ -1,6 +1,6 @@
 package bg.chat.server;
 
-import bg.chat.common.Constants;
+import bg.chat.utils.Constants;
 
 import java.io.IOException;
 import java.net.ServerSocket;
