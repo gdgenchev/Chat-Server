@@ -11,3 +11,12 @@ Socket communication:
     SEND 2 c->c - sending message chunks
     SEND 3 c->c finished message
     SEND 0 s->c - user is not online
+    
+Some programming aspects:
+
+        1.Multithreading and Swing
+        2.Displaying online users in a field
+          -Updating regularly without blocking the GUI
+        3.Future: Chat rooms and better UI
+
+![ScreenShot](/image/img.png)
