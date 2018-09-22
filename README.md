@@ -19,4 +19,4 @@ Some programming aspects:
           -Updating regularly without blocking the GUI
         3.Future: Chat rooms and better UI
 
-![ScreenShot](/image/img.png)
+![ScreenShot](/image/img.jpg)
