@@ -16,7 +16,7 @@ Some programming aspects:
 
         1.Multithreading and Swing
         2.Displaying online users in a field
-          -Updating regularly without blocking the GUI
+          -Updating when a user logs in/leaves without blocking the GUI
         3.Future: Chat rooms and better UI
 
 ![ScreenShot](/image/img.jpg)
