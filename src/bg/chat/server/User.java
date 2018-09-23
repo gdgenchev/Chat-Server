@@ -13,4 +13,8 @@ class User {
     SocketHandlingThread getSocket() {
         return socket;
     }
+
+    public String getUsername() {
+        return username;
+    }
 }

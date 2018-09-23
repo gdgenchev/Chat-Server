@@ -1,38 +1,35 @@
 package bg.chat.server;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.net.SocketException;
-import java.util.Collection;
 
 public class SocketHandlingThread extends Thread {
-    private final Socket socket;
-
-    private DataOutputStream out = null;
+    private final Socket       socket;
+    private ObjectOutputStream objectOutputStream = null;
+    private ObjectInputStream  objectInputStream = null;
 
     SocketHandlingThread(Socket socket) {
         this.socket = socket;
+        try {
+            objectInputStream = new ObjectInputStream(socket.getInputStream());
+            objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    public synchronized void writeLine(String line) throws IOException {
-        this.out.writeBytes(line + "\n");
-        out.flush();
+    synchronized void writeObject(Object obj) throws IOException {
+        this.objectOutputStream.writeObject(obj);
+        this.objectOutputStream.flush();
     }
 
     public void run() {
-        InputStream inp;
-        BufferedReader brinp;
-        try {
-            inp = socket.getInputStream();
-            brinp = new BufferedReader(new InputStreamReader(inp));
-            out = new DataOutputStream(socket.getOutputStream());
-        } catch (IOException e) {
-            return;
-        }
-        String line = null;
+        String line;
         while (true) {
             try {
-                line = brinp.readLine();
+                line = (String)objectInputStream.readObject();
                 if (line == null) {
                     socket.close();
                     return;
@@ -44,14 +41,11 @@ public class SocketHandlingThread extends Thread {
                     case "LOGIN":
                         String username = lineData[1];
                         if (ChatManager.getInstance().login(username, this)) {
-                            writeLine("LOGIN 1");
+                            writeObject("LOGIN 1");
+                            ChatManager.getInstance().updateOnlineUsers();
                         } else {
-                            writeLine("LOGIN 2");
+                            writeObject("LOGIN 2");
                         }
-                        break;
-                    case "LIST-USERS":
-                        Collection<String> usernames = ChatManager.getInstance().getAllUsernames();
-                        sendUsersList(usernames);
                         break;
                     case "SEND":
                         if (!ChatManager.getInstance().sendMessageToUser(
@@ -60,30 +54,21 @@ public class SocketHandlingThread extends Thread {
                                         cmd.length()
                                                 + lineData[1].length()
                                                 + lineData[2].length() + 3))) {
-                            writeLine("SEND 2");
+                            writeObject("SEND 2");
                         }
                         break;
                     case "QUIT":
                         ChatManager.getInstance().disconnectUser(lineData[1]);
-                        writeLine("QUIT");
+                        ChatManager.getInstance().updateOnlineUsers();
+                        writeObject("QUIT");
                         break;
                 }
-            } catch (SocketException e) {
+            } catch (IOException | ClassNotFoundException e) {
                 //Assume client disconnected
                 //Already handled disconnection from QUIT
                 return;
-           } catch (IOException e) {
-                e.printStackTrace();
-            }
+           }
         }
-    }
-
-    private void sendUsersList(Collection<String> usernames) throws IOException {
-        writeLine("LIST-USERS 0");
-        for (final String username : usernames) {
-            writeLine(username);
-        }
-        writeLine("LIST-USERS 1");
     }
 
 }
