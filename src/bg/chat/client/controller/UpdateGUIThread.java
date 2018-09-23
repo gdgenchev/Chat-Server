@@ -1,50 +1,37 @@
 package bg.chat.client.controller;
 
 import bg.chat.client.model.Client;
+import bg.chat.client.view.ChatView;
+import bg.chat.utils.DialogType;
 
 import javax.swing.*;
 import java.io.IOException;
 
 class UpdateGUIThread extends Thread {
     private Client client;
-    private JTextArea receivedMessagesTextArea;
-    private JTextArea onlineUsersTextArea;
+    private ChatView chatView;
 
-    UpdateGUIThread(Client client,
-                    JTextArea receivedMessagesTextArea,
-                    JTextArea onlineUsersTextArea) {
+    UpdateGUIThread(Client client, ChatView chatView) {
         this.client = client;
-        this.receivedMessagesTextArea = receivedMessagesTextArea;
-        this.onlineUsersTextArea = onlineUsersTextArea;
+        this.chatView = chatView;
     }
 
     @Override
     public void run() {
         try {
             while (true) {
-                StringBuilder onlineUsers = new StringBuilder();
-                String textToDisplay = null;
-                String line = client.readLine();
+                String textToDisplay;
+                String line = (String) client.readObject();
                 String[] lineData = line.split(" ");
                 String cmd = lineData[0];
-                if (line.equalsIgnoreCase("list-users 0")) {
-                    boolean has = false;
-                    while (!line.equalsIgnoreCase("list-users 1")) {
-                        line = client.readLine();
-                        if (!line.equalsIgnoreCase("list-users 1")) {
-                            if (!line.equalsIgnoreCase(client.getUsername())) {
-                                has = true;
-                                onlineUsers.append(line).append("\n");
-                            }
-                        }
-                    }
-                    if (!has) {
-                        onlineUsers.append("No online users");
-                    }
-                    SwingUtilities.invokeLater(() ->
-                    {
-                        if (!onlineUsersTextArea.getText().equals(onlineUsers.toString())) {
-                            onlineUsersTextArea.setText(onlineUsers.toString());
+                if (cmd.equalsIgnoreCase("list")) {
+                    String onlineUsersToDisplay = line.substring(5);
+                    SwingUtilities.invokeLater(() -> {
+                        JTextArea onlineUsersTextArea = chatView.getOnlineUsersTextArea();
+                        if (onlineUsersToDisplay.isEmpty()) {
+                            onlineUsersTextArea.setText("No online users.");
+                        } else if (!onlineUsersTextArea.getText().equals(onlineUsersToDisplay)) {
+                            onlineUsersTextArea.setText(onlineUsersToDisplay);
                         }
                     });
                 } else if (cmd.equalsIgnoreCase("send")) {
@@ -53,19 +40,19 @@ class UpdateGUIThread extends Thread {
                         String from = lineData[2];
                         String receivedText = line.substring(cmd.length() + from.length() + 4);
                         textToDisplay = from + ": " + receivedText;
-
+                        String finalTextToDisplay = textToDisplay;
+                        SwingUtilities.invokeLater(() ->
+                                chatView.getReceivedMessagesTextArea().append(finalTextToDisplay + "\n"));
                     } else if (state == 2) {
-                        textToDisplay = "The user is not online";
+                        chatView.showDialog("User isn't online at the moment!", DialogType.ERROR);
+                        chatView.getReceivedMessagesTextArea().append("Couldn't send message.\n");
                     }
-                    String finalTextToDisplay = textToDisplay;
-                    SwingUtilities.invokeLater(() ->
-                            receivedMessagesTextArea.append(finalTextToDisplay + "\n"));
                 } else if (cmd.equalsIgnoreCase("quit")) {
                     client.close();
                     return;
                 }
             }
-        } catch (IOException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }

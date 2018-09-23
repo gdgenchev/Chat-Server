@@ -14,12 +14,7 @@ class ChatController {
     ChatController(Client client, ChatView chatView) {
         this.client = client;
         this.chatView = chatView;
-        new UpdateGUIThread(
-                client,
-                chatView.getReceivedMessagesTextArea(),
-                chatView.getOnlineUsersTextArea())
-                .start();
-        new AskForOnlineUsersThread(client).start();
+        new UpdateGUIThread(client, chatView).start();
         this.chatView.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
                 try {
@@ -70,23 +65,26 @@ class ChatController {
     private class SendActionListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
-            String[] lines = chatView.getMessage().split("\n");
-            for (String line : lines) {
-                if (!chatView.getMessage().isEmpty()) {
-                    try {
+            if (client.getUsername().equals(chatView.getReceiver())) {
+                chatView.showDialog("You can't send a message to yourself.", DialogType.ERROR);
+                chatView.getSendMessageTextArea().setText("");
+                return;
+            }
+            String message = chatView.getSendMessageTextArea().getText();
+                try {
+                    if (!message.isEmpty()) {
                         chatView.getReceivedMessagesTextArea()
-                                .append(client.getUsername() + ": " + line + "\n");
+                                .append(client.getUsername() + ": " + message + "\n");
                         client.writeLine("SEND "
                                 + client.getUsername() + " "
                                 + chatView.getReceiver() + " "
-                                + line);
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                                + message);
+                        chatView.getSendMessageTextArea().setText("");
                     }
-                } else {
-                    chatView.showDialog("Please type in a message", DialogType.ERROR);
+
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-            }
         }
     }
 }

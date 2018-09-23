@@ -31,8 +31,8 @@ class LoginController {
                 FileUtils.checkUser(username, password);
                 client.setUsername(username);
                 client.writeLine("LOGIN " + client.getUsername());
-                String line = client.readLine();
-                if (line.equalsIgnoreCase("login 1")) {
+                String line = (String) client.readObject();
+                if (line.equalsIgnoreCase("LOGIN 1")) {
                     ChatView chatView = new ChatView();
                     new ChatController(client, chatView);
                     chatView.setVisible(true);
@@ -42,7 +42,7 @@ class LoginController {
                 }
             } catch (WrongUsernameException | WrongPasswordException e) {
                 loginView.showDialog(e.getMessage(), DialogType.ERROR);
-            } catch (IOException e) {
+            } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
         }
