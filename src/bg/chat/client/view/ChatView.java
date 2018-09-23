@@ -24,6 +24,9 @@ public class ChatView extends JFrame {
     private JPanel sendPanel;
     private JTextField toTextField;
     private JLabel currentUser;
+    private JTextArea textArea1;
+    private JTextField textField2;
+    private JButton joinButton;
 
     public ChatView() {
         setTitle("Chat Server");
@@ -42,10 +45,6 @@ public class ChatView extends JFrame {
             onlineUsersTextArea.addMouseListener(listenForClickOnOnlineUsers);
     }
 
-    public String getMessage() {
-        return sendMessageTextArea.getText();
-    }
-
     public String getReceiver() {
         return toTextField.getText();
     }
@@ -60,6 +59,10 @@ public class ChatView extends JFrame {
 
     public JTextArea getReceivedMessagesTextArea() {
         return receivedMessagesTextArea;
+    }
+
+    public JTextArea getSendMessageTextArea() {
+        return sendMessageTextArea;
     }
 
     public void showDialog(String message, DialogType type) {
