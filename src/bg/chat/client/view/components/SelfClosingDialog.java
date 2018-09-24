@@ -1,8 +1,6 @@
-package bg.chat.client.view.CustomComponents;
+package bg.chat.client.view.components;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
+import java.awt.*;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -20,6 +18,7 @@ public class SelfClosingDialog {
         dialog = jop.createDialog(null, title);
         changeColor(dialog.getComponents());
         this.ms = ms;
+        dialog.setModalityType(Dialog.ModalityType.MODELESS);
     }
 
     private void changeColor(Component[] comp) {
