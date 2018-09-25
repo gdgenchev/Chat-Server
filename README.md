@@ -10,11 +10,10 @@ Socket communication:
     QUIT username c->s - disconnect user
     QUIT s->c - quit client
     CREATE creator chatRoomName c->s - indicate creation of a chat room
-Some programming aspects:
-
-        1.Multithreading and Swing
-        2.Displaying online users in a field
-          -Updating when a user logs in/leaves without blocking the GUI
-        3.Future: Chat rooms and better UI
+    JOIN username chatRoomName c->s - join chat room
+    JOIN_SUCCESS s->c - All good
+    JOIN_FAIL s->c - Already joined
+    LEAVE_ROOM username chatRoom c->s - Leave chatRoom
+    DELETE_ROOM room c->s - Delete room (only available for creator)
 
 ![ScreenShot](/image/img.jpg)
