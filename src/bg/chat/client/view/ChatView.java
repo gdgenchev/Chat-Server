@@ -1,10 +1,9 @@
 package bg.chat.client.view;
 
-import bg.chat.client.view.CustomComponents.SelfClosingDialog;
+import bg.chat.client.view.components.SelfClosingDialog;
 import bg.chat.utils.DialogType;
 
 import javax.swing.*;
-import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -21,12 +20,12 @@ public class ChatView extends JFrame {
     private JTextArea onlineUsersTextArea;
     private JPanel onlineUsersPanel;
     private JScrollPane onlineUsersScrollPane;
-    private JPanel sendPanel;
-    private JTextField toTextField;
     private JLabel currentUser;
-    private JTextArea textArea1;
-    private JTextField textField2;
+    private JTextField receiverTextField;
+    private JTextArea onlineChatRoomsTextArea;
+    private JTextField chatRoomName;
     private JButton joinButton;
+    private JButton createButton;
 
     public ChatView() {
         setTitle("Chat Server");
@@ -46,7 +45,7 @@ public class ChatView extends JFrame {
     }
 
     public String getReceiver() {
-        return toTextField.getText();
+        return receiverTextField.getText();
     }
 
     public void addSendListener(ActionListener listenForSendButton) {
@@ -69,8 +68,15 @@ public class ChatView extends JFrame {
         new SelfClosingDialog(message, type.toString(), 1500).showDialogAndClose();
     }
 
-    public JLabel getCurrentUser() {
-        return currentUser;
+    public void addCreateChatRoomListener(ActionListener listenForCreateButton) {
+        createButton.addActionListener(listenForCreateButton);
     }
 
+    public String getChatRoomName() {
+        return chatRoomName.getText();
+    }
+
+    public void setCurrentUsername(String username) {
+        this.currentUser.setText(username);
+    }
 }

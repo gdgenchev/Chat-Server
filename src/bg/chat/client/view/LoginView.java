@@ -1,7 +1,7 @@
 package bg.chat.client.view;
 
 import bg.chat.utils.DialogType;
-import bg.chat.client.view.CustomComponents.SelfClosingDialog;
+import bg.chat.client.view.components.SelfClosingDialog;
 import bg.chat.utils.Constants;
 
 import javax.swing.*;
