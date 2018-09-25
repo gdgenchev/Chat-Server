@@ -1,9 +1,15 @@
 package bg.chat.server;
 
+import bg.chat.common.Message;
+import bg.chat.common.MsgState;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.Arrays;
+
+import static bg.chat.common.MsgState.*;
 
 public class SocketHandlingThread extends Thread {
     private final Socket       socket;
@@ -20,47 +26,49 @@ public class SocketHandlingThread extends Thread {
         }
     }
 
-    synchronized void writeObject(Object obj) throws IOException {
-        this.objectOutputStream.writeObject(obj);
+    synchronized void writeMessage(Message msg) throws IOException {
+        this.objectOutputStream.writeObject(msg);
         this.objectOutputStream.flush();
     }
 
     public void run() {
-        String line;
+        Message msg;
         while (true) {
             try {
-                line = (String)objectInputStream.readObject();
-                if (line == null) {
+                msg = (Message) objectInputStream.readObject();
+                if (msg == null) {
                     socket.close();
                     return;
                 }
-                System.out.println(line);
-                String[] lineData = line.split(" ");
-                String cmd = lineData[0];
-                switch (cmd) {
-                    case "LOGIN":
-                        String username = lineData[1];
+                System.out.println(msg.getState().toString() + " " + msg.getData());
+                switch (msg.getState()) {
+                    case LOGIN:
+                        String username = (String) msg.getData();
                         if (ChatManager.getInstance().login(username, this)) {
-                            writeObject("LOGIN 1");
+                            writeMessage(new Message(LOGIN_SUCCESS));
                             ChatManager.getInstance().updateOnlineUsers();
                         } else {
-                            writeObject("LOGIN 2");
+                            writeMessage(new Message(LOGIN_FAIL));
                         }
                         break;
-                    case "SEND":
+                    case SEND_PRIVATE: {
+                        String[] data = (String[]) msg.getData();
                         if (!ChatManager.getInstance().sendMessageToUser(
-                                lineData[1], lineData[2],
-                                line.substring(
-                                        cmd.length()
-                                                + lineData[1].length()
-                                                + lineData[2].length() + 3))) {
-                            writeObject("SEND 2");
+                                data[0], data[1], data[2])) {
+                            writeMessage(new Message(SEND_PRIVATE_FAIL));
                         }
                         break;
-                    case "QUIT":
-                        ChatManager.getInstance().disconnectUser(lineData[1]);
+                    }
+                    case CREATE: {
+                        String[] data = (String[]) msg.getData();
+                        ChatManager.getInstance().createChatRoom(data[0], data[1]);
+                        ChatManager.getInstance().updateOnlineChatRooms();
+                        break;
+                    }
+                    case QUIT:
+                        ChatManager.getInstance().disconnectUser((String) msg.getData());
                         ChatManager.getInstance().updateOnlineUsers();
-                        writeObject("QUIT");
+                        writeMessage(new Message(QUIT));
                         break;
                 }
             } catch (IOException | ClassNotFoundException e) {
