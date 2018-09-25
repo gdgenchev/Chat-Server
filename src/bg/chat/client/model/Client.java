@@ -1,16 +1,18 @@
 package bg.chat.client.model;
 
 import bg.chat.client.exceptions.FailedConnectionException;
+import bg.chat.common.Message;
 
 import java.io.*;
 import java.net.Socket;
 
 public class Client implements Closeable {
 
-    private Socket           socket;
+    private Socket             socket;
     private ObjectOutputStream objectOutputStream = null;
-    private ObjectInputStream objectInputStream = null;
-    private String           username;
+    private ObjectInputStream  objectInputStream = null;
+    private String             username;
+    private String             chatRoomName;
 
     public Client() {
         username  = null;
@@ -26,13 +28,13 @@ public class Client implements Closeable {
         }
     }
 
-    public void writeLine(String line) throws IOException {
-        this.objectOutputStream.writeObject(line);
+    public void writeMessage(Message msg) throws IOException {
+        this.objectOutputStream.writeObject(msg);
         this.objectOutputStream.flush();
     }
 
-    public Object readObject() throws ClassNotFoundException, IOException {
-        return this.objectInputStream.readObject();
+    public Message readMessage() throws ClassNotFoundException, IOException {
+        return (Message)this.objectInputStream.readObject();
     }
 
     public void setUsername(String username) {
@@ -48,5 +50,13 @@ public class Client implements Closeable {
        objectOutputStream.close();
        objectInputStream.close();
        socket.close();
+    }
+
+    public String getChatRoomName() {
+        return chatRoomName;
+    }
+
+    public void setChatRoomName(String chatRoomName) {
+        this.chatRoomName = chatRoomName;
     }
 }
