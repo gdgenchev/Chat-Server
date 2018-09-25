@@ -1,6 +1,6 @@
 package bg.chat.common;
 
-public enum MsgState {
+public enum MessageType {
     LOGIN,
     LOGIN_SUCCESS,
     LOGIN_FAIL,
@@ -16,6 +16,8 @@ public enum MsgState {
     SEND_PRIVATE_SUCCESS,
     SEND_PRIVATE_FAIL,
     SEND_GROUP,
+    LEAVE_ROOM,
+    DELETE_ROOM,
+    CHAT_ROOM_DELETED,
     QUIT,
-
 }
