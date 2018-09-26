@@ -62,6 +62,9 @@ class PrivateChatReceiver implements Receiver {
                     String[] data = (String[]) msg.getData();
                     goToChatRoom(data[0], data[1]);
                     break;
+                case JOIN_FAIL:
+                    chatView.showDialog((String)msg.getData(), DialogType.ERROR);
+                    break;
                 case QUIT:
                     client.close();
             }
@@ -73,6 +76,7 @@ class PrivateChatReceiver implements Receiver {
         ChatRoomView chatRoomView = new ChatRoomView();
         chatRoomView.setCreator(creator);
         receiverBroadcaster.addReceiver(new ChatRoomReceiver(client, chatRoomView));
+
         new ChatRoomController(client, chatRoomView);
         if (client.getUsername().equals(creator)) {
             chatRoomView.showDeleteButton();
