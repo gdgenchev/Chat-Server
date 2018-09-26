@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="ERROR">
     <Appenders>
-        <File name="FileAppender" fileName="ControllerLogs.log">
+        <File name="FileAppender" fileName="ClientLogs.log">
             <PatternLayout pattern="%date{HH:mm:ss} [%threadName] %-5level - %msg%n"/>
         </File>
         <Console name="ConsoleAppender">
