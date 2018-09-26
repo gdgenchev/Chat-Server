@@ -22,7 +22,6 @@ public class LoginController {
     private Client client;
     private static final Logger logger = LogManager.getLogger("Login Controller");
 
-
     public LoginController(Client client, LoginView loginView) {
         this.client = client;
         this.loginView = loginView;
@@ -35,10 +34,13 @@ public class LoginController {
             try {
                 String username = loginView.getUsername();
                 char[] password = loginView.getPassword();
+
                 FileUtils.checkUser(username, password);
+
                 client.setUsername(username);
                 client.connectToServer(Constants.HOST, Constants.PORT);
                 client.writeMessage(new Message(MessageType.LOGIN,client.getUsername()));
+
                 if (client.readMessage().getType().equals(MessageType.LOGIN_SUCCESS)) {
                     PrivateChatView chatView = new PrivateChatView();
                     new PrivateChatController(client, chatView);
@@ -50,6 +52,7 @@ public class LoginController {
             } catch (WrongUsernameException | WrongPasswordException e) {
                 loginView.showDialog(e.getMessage(), DialogType.ERROR);
             } catch (FailedConnectionException e) {
+                loginView.showDialog("Error occurred while logging in", DialogType.ERROR);
                 logger.warn("Exception thrown while logging in");
             }
         }

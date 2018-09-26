@@ -2,7 +2,6 @@ package bg.chat.server;
 
 class User {
     private SocketHandlingThread socket;
-
     private String username;
 
     User(String username, SocketHandlingThread socket) {

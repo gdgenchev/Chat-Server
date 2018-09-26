@@ -42,6 +42,7 @@ public class ChatRoomController {
         this.chatRoomView.addSendListener(actionEvent -> {
             String[] toSend = {client.getUsername(), client.getChatRoom(),
                     chatRoomView.getSendMessageTextArea().getText()};
+            chatRoomView.getReceivedMessagesTextArea().append(toSend[0] + ": " + toSend[2] + "\n");
             client.writeMessage(new Message(MessageType.SEND_GROUP, toSend));
         });
     }

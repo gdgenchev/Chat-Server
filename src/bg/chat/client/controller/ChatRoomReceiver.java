@@ -29,6 +29,14 @@ public class ChatRoomReceiver implements Receiver {
                 case LEAVE_ROOM:
                     chatRoomView.setVisible(false);
                     break;
+                case JOINED_USERS:
+                    String joinedUsers = (String)msg.getData();
+                    if (joinedUsers.isEmpty()) {
+                        chatRoomView.getOnlineUsersTextArea().setText("No online users");
+                    } else {
+                        chatRoomView.getOnlineUsersTextArea().setText(joinedUsers);
+                    }
+                    break;
             }
         }
     }

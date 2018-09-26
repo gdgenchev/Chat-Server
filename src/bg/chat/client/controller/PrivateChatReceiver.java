@@ -28,7 +28,7 @@ class PrivateChatReceiver implements Receiver {
                     SwingUtilities.invokeLater(() -> {
                         JTextArea onlineUsersTextArea = chatView.getOnlineUsersTextArea();
                         if (onlineUsersToDisplay.isEmpty()) {
-                            onlineUsersTextArea.setText("No online users.");
+                            onlineUsersTextArea.setText("No online users");
                         } else {
                             onlineUsersTextArea.setText(onlineUsersToDisplay);
                         }
@@ -38,7 +38,7 @@ class PrivateChatReceiver implements Receiver {
                     String onlineChatRoomNames = (String) msg.getData();
                     JTextArea onlineChatRooms = chatView.getOnlineChatRoomsTextArea();
                     if (onlineChatRoomNames.isEmpty()) {
-                        onlineChatRooms.setText("No online chat rooms.");
+                        onlineChatRooms.setText("No online rooms");
                     } else {
                         onlineChatRooms.setText(onlineChatRoomNames);
                     }
@@ -62,10 +62,14 @@ class PrivateChatReceiver implements Receiver {
                     String[] data = (String[]) msg.getData();
                     goToChatRoom(data[0], data[1]);
                     break;
+                case CREATE_FAIL:
+                    chatView.showDialog("Chat room with that name already exists", DialogType.ERROR);
+                    break;
                 case JOIN_FAIL:
                     chatView.showDialog((String)msg.getData(), DialogType.ERROR);
                     break;
                 case QUIT:
+                    client.setConnected(false);
                     client.close();
             }
         }

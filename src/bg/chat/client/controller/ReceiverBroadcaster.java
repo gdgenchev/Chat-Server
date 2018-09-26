@@ -26,7 +26,7 @@ public class ReceiverBroadcaster extends Thread {
 
     @Override
     public void run() {
-        while (true) {
+        while (client.isConnected()) {
             broadcastMessage(client.readMessage());
         }
     }

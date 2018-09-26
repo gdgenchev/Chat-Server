@@ -1,13 +1,15 @@
 package bg.chat.server;
 
 import bg.chat.common.Message;
-import bg.chat.common.MsgState;
+import bg.chat.common.MessageType;
 import bg.chat.server.exceptions.UserAlreadyInChatRoomException;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
-public class ChatManager {
+class ChatManager {
     private static ChatManager instance = null;
     private Map<String, User>  connectedUsers;
     private Map<String, ChatRoom> chatRooms;
@@ -34,18 +36,17 @@ public class ChatManager {
         return true;
     }
 
-    synchronized void updateOnlineUsers() throws IOException {
-        Set<String> usernames = new HashSet<>(connectedUsers.keySet());
-        sendUsersList(usernames);
+    synchronized void updateOnlineUsers() {
+        sendUsersList(new HashSet<>(connectedUsers.keySet()));
     }
 
-    synchronized boolean sendMessageToUser(String from, String to, String message) throws IOException {
-        User user = this.connectedUsers.get(to);
-        if (user == null) {
+    synchronized boolean sendMessageToUser(String from, String to, String message) {
+        User receiver = this.connectedUsers.get(to);
+        if (receiver == null) {
             return false;
         }
         String[] data = {from, message};
-        user.getSocket().writeMessage(new Message(MsgState.SEND_PRIVATE_SUCCESS, data));
+        receiver.getSocket().writeMessage(new Message(MessageType.SEND_PRIVATE_SUCCESS, data));
         return true;
     }
 
@@ -53,45 +54,69 @@ public class ChatManager {
         connectedUsers.remove(username);
     }
 
-    private void sendUsersList(Set<String> usernames) throws IOException {
+    private void sendUsersList(Set<String> usernames) {
         for (User user : connectedUsers.values()) {
             usernames.remove(user.getUsername()); //O(1)
             String textToSend = String.join("\n", usernames);
-            user.getSocket().writeMessage(new Message(MsgState.LIST_USERS, textToSend));
+            user.getSocket().writeMessage(new Message(MessageType.LIST_USERS, textToSend));
             usernames.add(user.getUsername()); //O(1)
         }
     }
 
-    synchronized void createChatRoom(String creator, String chatRoomName) {
+    synchronized boolean createChatRoom(String creator, String chatRoomName) {
         User userCreator = connectedUsers.get(creator);
         ChatRoom chatRoom = new ChatRoom(userCreator, chatRoomName);
+        if (chatRooms.containsKey(chatRoomName)) {
+            return false;
+        }
         chatRooms.put(chatRoomName,chatRoom);
+        return true;
     }
 
-    synchronized void joinChatRoom(String user, String chatRoomName)
+    synchronized boolean joinChatRoom(String user, String chatRoomName)
             throws UserAlreadyInChatRoomException {
         User joiner = connectedUsers.get(user);
-        ChatRoom chatRoom = chatRooms.get(chatRoomName);
-        chatRoom.addUser(joiner);
+        if (chatRooms.containsKey(chatRoomName)) {
+            chatRooms.get(chatRoomName).addUser(joiner);
+            return true;
+        }
+        return false;
     }
 
-    synchronized void sendMessageInChatRoom(String sender, String chatRoomName, String message) throws IOException {
-        User senderUser = connectedUsers.get(sender);
+    synchronized void sendMessageInChatRoom(String sender, String chatRoomName, String message) {
         ChatRoom chatRoom = chatRooms.get(chatRoomName);
         chatRoom.broadcastMessage(sender, message);
     }
 
-    public void updateOnlineChatRooms() throws IOException {
+    synchronized void updateOnlineChatRooms() {
         Set<String> chatRoomNames = new HashSet<>(chatRooms.keySet());
         broadcastOnlineChatRoomNames(chatRoomNames);
     }
 
-    private void broadcastOnlineChatRoomNames(Set<String> chatRoomNames) throws IOException {
+    private void broadcastOnlineChatRoomNames(Set<String> chatRoomNames) {
         for (User user : connectedUsers.values()) {
             user.getSocket().writeMessage(
                     new Message(
-                            MsgState.LIST_CHAT_ROOMS,
+                            MessageType.LIST_CHAT_ROOMS,
                             String.join("\n", chatRoomNames)));
         }
+    }
+
+    String getChatRoomOwner(String chatRoomName) {
+        return  chatRooms.get(chatRoomName).getCreator().getUsername();
+    }
+
+    synchronized void removeUserFromChatRoom(String username, String chatRoomName) {
+        ChatRoom chatRoom = chatRooms.get(chatRoomName);
+        chatRoom.removeUserFromChatRoom(username);
+    }
+
+    void deleteRoom(String roomName) {
+        chatRooms.get(roomName).notifyUsersForDelete();
+        chatRooms.remove(roomName);
+    }
+
+    synchronized void updateJoinedUsersForChatRoom(String chatRoomName) {
+        chatRooms.get(chatRoomName).broadcastJoinedUsers();
     }
 }

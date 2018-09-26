@@ -12,6 +12,7 @@ public enum MessageType {
     JOIN,
     JOIN_SUCCESS,
     JOIN_FAIL,
+    JOINED_USERS,
     SEND_PRIVATE,
     SEND_PRIVATE_SUCCESS,
     SEND_PRIVATE_FAIL,

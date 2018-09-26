@@ -5,13 +5,10 @@ import bg.chat.client.view.PrivateChatView;
 import bg.chat.common.Message;
 import bg.chat.common.MessageType;
 import bg.chat.utils.DialogType;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import javax.swing.*;
+import javax.swing.text.BadLocationException;
+import java.awt.event.*;
 
 class PrivateChatController {
     private Client client;
@@ -22,28 +19,78 @@ class PrivateChatController {
         this.client = client;
         this.chatView = chatView;
 
+        this.chatView.setCurrentUsername(client.getUsername());
+
         this.receiverBroadcaster = new ReceiverBroadcaster(client);
+
         receiverBroadcaster.addReceiver(new PrivateChatReceiver(client, chatView, receiverBroadcaster));
         receiverBroadcaster.start();
 
-        this.chatView.addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                client.writeMessage(new Message(MessageType.QUIT,client.getUsername()));
-            }
-
-            @Override
-            public void windowDeiconified(WindowEvent windowEvent) {
-                chatView.revalidate();
-                chatView.repaint();
-            }
-        });
-        this.chatView.setCurrentUsername(client.getUsername());
+        //Add listeners
         this.chatView.addSendListener(new SendActionListener());
         this.chatView.addCreateChatRoomListener(new CreateChatRoomListener());
         this.chatView.addJoinChatRoomListener(new JoinChatRoomListener());
+        this.chatView.addWindowListener(new CloseMinimizeWindowListener());
+        this.chatView.addOnlineUsersListener(new OnClickOnlineUsersListener());
+        this.chatView.addOnlineChatRoomsListener(new OnClickOnlineChatRoomsListener());
+    }
+
+    private String getTextOnClickFromTextArea(JTextArea textArea) {
+        try {
+            int line = textArea.getLineOfOffset( textArea.getCaretPosition() );
+            int start = textArea.getLineStartOffset( line );
+            int end = textArea.getLineEndOffset( line );
+            return textArea.getDocument().getText(start, end - start);
+        } catch (BadLocationException e1) {
+            e1.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * Private Listeners
+     *
+     */
+    private class CloseMinimizeWindowListener extends WindowAdapter {
+
+        @Override
+        public void windowClosing(WindowEvent e) {
+            client.writeMessage(new Message(MessageType.QUIT,client.getUsername()));
+        }
+
+        @Override
+        public void windowDeiconified(WindowEvent windowEvent) {
+            chatView.revalidate();
+            chatView.repaint();
+        }
+    }
+
+    private class OnClickOnlineUsersListener extends MouseAdapter {
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            JTextArea textArea = chatView.getOnlineUsersTextArea();
+            String receiver = getTextOnClickFromTextArea(textArea);
+            if (receiver != null && !receiver.equals("No online users")) {
+                chatView.setReceiver(receiver);
+            }
+        }
+    }
+
+    private class OnClickOnlineChatRoomsListener extends MouseAdapter {
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            JTextArea onlineChatRoomsTextArea = chatView.getOnlineChatRoomsTextArea();
+            String chatRoom = getTextOnClickFromTextArea(onlineChatRoomsTextArea);
+            if (chatRoom != null && !chatRoom.equals("No online rooms")) {
+                chatView.setChatRoomTextField(chatRoom);
+            }
+        }
     }
 
     private class SendActionListener implements ActionListener {
+
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             if (client.getUsername().equals(chatView.getReceiver())) {
@@ -69,17 +116,19 @@ class PrivateChatController {
     }
 
     private class CreateChatRoomListener implements ActionListener {
+
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
-            String[] data = {client.getUsername(),chatView.getChatRoomName()};
+            String[] data = {client.getUsername(),chatView.getChatRoomNameTextField()};
             client.writeMessage(new Message(MessageType.CREATE, data));
         }
     }
 
     private class JoinChatRoomListener implements ActionListener {
+
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
-            String[] data = {client.getUsername(),chatView.getChatRoomName()};
+            String[] data = {client.getUsername(),chatView.getChatRoomNameTextField()};
             client.writeMessage(new Message(MessageType.JOIN, data));
         }
     }

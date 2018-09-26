@@ -37,7 +37,7 @@ public class ChatRoomView extends JFrame {
         pack();
         getRootPane().setDefaultButton(sendButton);
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        remove(deleteChatRoomButton);
+        deleteChatRoomButton.setVisible(false);
     }
 
     public void addMouseListener(MouseAdapter listenForClickOnOnlineUsers) {
@@ -77,7 +77,7 @@ public class ChatRoomView extends JFrame {
     }
 
     public void showDeleteButton() {
-        add(deleteChatRoomButton);
+        deleteChatRoomButton.setVisible(true);
     }
 
     public void setCreator(String creator) {
@@ -86,5 +86,13 @@ public class ChatRoomView extends JFrame {
 
     public String getCreator() {
         return creator.getText();
+    }
+
+    public String getChatRoomName() {
+        return chatRoomName.getText();
+    }
+
+    public void addDeleteChatRoomListener(ActionListener listenForDeleteButton) {
+        this.deleteChatRoomButton.addActionListener(listenForDeleteButton);
     }
 }

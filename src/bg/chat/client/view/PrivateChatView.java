@@ -6,9 +6,9 @@ import bg.chat.utils.DialogType;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
+import java.awt.event.MouseListener;
 
-public class ChatView extends JFrame {
+public class PrivateChatView extends JFrame {
     private JPanel mainPanel;
     private JButton sendButton;
     private JPanel chatPanel;
@@ -23,11 +23,11 @@ public class ChatView extends JFrame {
     private JLabel currentUser;
     private JTextField receiverTextField;
     private JTextArea onlineChatRoomsTextArea;
-    private JTextField chatRoomName;
+    private JTextField chatRoomNameTextField;
     private JButton joinButton;
     private JButton createButton;
 
-    public ChatView() {
+    public PrivateChatView() {
         setTitle("Chat Server");
         setContentPane(mainPanel);
         setLocationByPlatform(true);
@@ -40,18 +40,20 @@ public class ChatView extends JFrame {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     }
 
-    public void addMouseListener(MouseAdapter listenForClickOnOnlineUsers) {
-            onlineUsersTextArea.addMouseListener(listenForClickOnOnlineUsers);
+    //Setters
+    public void setCurrentUsername(String username) {
+        this.currentUser.setText(username);
     }
 
-    public String getReceiver() {
-        return receiverTextField.getText();
+    public void setReceiver(String receiver) {
+        this.receiverTextField.setText(receiver);
     }
 
-    public void addSendListener(ActionListener listenForSendButton) {
-        this.sendButton.addActionListener(listenForSendButton);
+    public void setChatRoomTextField(String chatRoom) {
+        this.chatRoomNameTextField.setText(chatRoom);
     }
 
+    //Getters
     public JTextArea getOnlineUsersTextArea() {
         return onlineUsersTextArea;
     }
@@ -64,19 +66,41 @@ public class ChatView extends JFrame {
         return sendMessageTextArea;
     }
 
+    public JTextArea getOnlineChatRoomsTextArea() {
+        return onlineChatRoomsTextArea;
+    }
+
+    public String getChatRoomNameTextField() {
+        return chatRoomNameTextField.getText();
+    }
+
+    public String getReceiver() {
+        return receiverTextField.getText();
+    }
+
+    //Dialog
     public void showDialog(String message, DialogType type) {
         new SelfClosingDialog(message, type.toString(), 1500).showDialogAndClose();
     }
 
+    //Add Listeners
+    public void addOnlineUsersListener(MouseListener listenForUserClick) {
+        this.onlineUsersTextArea.addMouseListener(listenForUserClick);
+    }
+
+    public void addOnlineChatRoomsListener(MouseListener listenForChatRoomClick) {
+        this.onlineChatRoomsTextArea.addMouseListener(listenForChatRoomClick);
+    }
+
+    public void addSendListener(ActionListener listenForSendButton) {
+        this.sendButton.addActionListener(listenForSendButton);
+    }
+
+    public void addJoinChatRoomListener(ActionListener listenForJoinButton) {
+        joinButton.addActionListener(listenForJoinButton);
+    }
+
     public void addCreateChatRoomListener(ActionListener listenForCreateButton) {
         createButton.addActionListener(listenForCreateButton);
-    }
-
-    public String getChatRoomName() {
-        return chatRoomName.getText();
-    }
-
-    public void setCurrentUsername(String username) {
-        this.currentUser.setText(username);
     }
 }

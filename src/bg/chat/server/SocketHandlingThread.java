@@ -18,6 +18,7 @@ public class SocketHandlingThread extends Thread {
     private final Socket socket;
     private ObjectOutputStream objectOutputStream = null;
     private ObjectInputStream objectInputStream = null;
+    private String loggedInUser;
     private static final Logger logger = LogManager.getLogger("Socket Handling Thread Logger");
 
     SocketHandlingThread(Socket socket) {
@@ -34,7 +35,7 @@ public class SocketHandlingThread extends Thread {
         try {
             this.objectOutputStream.writeObject(msg);
             this.objectOutputStream.flush();
-            logger.info("Server sent message " + msg.getType());
+            logger.info("Server sent message " + msg.getType() + " to " + loggedInUser);
         } catch (IOException e) {
             logger.warn("Exception thrown while writing to client");
         }
@@ -43,7 +44,7 @@ public class SocketHandlingThread extends Thread {
     private Message readMessage() {
         try {
             Message msg = (Message) objectInputStream.readObject();
-            logger.info("Server received a message " + msg.getType());
+            logger.info("Server received a message from "  + loggedInUser + ": " + msg.getType());
             return msg;
         } catch (IOException | ClassNotFoundException e) {
             logger.warn("Exception thrown while reading a message");
@@ -58,21 +59,23 @@ public class SocketHandlingThread extends Thread {
                 close();
                 return;
             }
+            ChatManager instance = ChatManager.getInstance();
             switch (msg.getType()) {
                 case LOGIN: {
                     String username = (String) msg.getData();
                     if (ChatManager.getInstance().login(username, this)) {
+                        this.loggedInUser = username;
                         writeMessage(new Message(LOGIN_SUCCESS));
                         ChatManager.getInstance().updateOnlineUsers();
                     } else {
                         writeMessage(new Message(LOGIN_FAIL));
                     }
-                    ChatManager.getInstance().updateOnlineChatRooms();
+                    instance.updateOnlineChatRooms();
                     break;
                 }
                 case SEND_PRIVATE: {
                     String[] data = (String[]) msg.getData();
-                    if (!ChatManager.getInstance().sendMessageToUser(
+                    if (!instance.sendMessageToUser(
                             data[0], data[1], data[2])) {
                         writeMessage(new Message(SEND_PRIVATE_FAIL));
                     }
@@ -81,15 +84,19 @@ public class SocketHandlingThread extends Thread {
                 case SEND_GROUP: {
                     String[] data = (String[]) msg.getData();
                     System.out.println(Arrays.toString(data));
-                    ChatManager.getInstance().sendMessageInChatRoom(data[0], data[1], data[2]);
+                    instance.sendMessageInChatRoom(data[0], data[1], data[2]);
                     break;
                 }
                 case CREATE: {
                     String[] data = (String[]) msg.getData();
-                    ChatManager.getInstance().createChatRoom(data[0], data[1]);
-                    String[] dataToSend = {data[0], data[1]};
-                    writeMessage(new Message(CREATE_SUCCESS, dataToSend));
-                    ChatManager.getInstance().updateOnlineChatRooms();
+                    if (instance.createChatRoom(data[0], data[1])) {
+                        String[] dataToSend = {data[0], data[1]};
+                        writeMessage(new Message(CREATE_SUCCESS, dataToSend));
+                        instance.updateOnlineChatRooms();
+                        instance.updateJoinedUsersForChatRoom(data[1]);
+                    } else {
+                        writeMessage(new Message(CREATE_FAIL));
+                    }
                     break;
                 }
                 case JOIN: {
@@ -97,9 +104,10 @@ public class SocketHandlingThread extends Thread {
                     String username = data[0];
                     String chatRoomName = data[1];
                     try {
-                        if (ChatManager.getInstance().joinChatRoom(username, chatRoomName)) {
+                        if (instance.joinChatRoom(username, chatRoomName)) {
                             String[] dataToSend = {ChatManager.getInstance().getChatRoomOwner(chatRoomName), chatRoomName};
                             writeMessage(new Message(JOIN_SUCCESS, dataToSend));
+                            instance.updateJoinedUsersForChatRoom(data[1]);
                         } else {
                             logger.info("Client tried to join a non-existent chat room");
                             writeMessage(new Message(JOIN_FAIL, "Chat room does not exist"));
@@ -112,20 +120,21 @@ public class SocketHandlingThread extends Thread {
                 }
                 case LEAVE_ROOM: {
                     String[] data = (String[]) msg.getData();
-                    ChatManager.getInstance().removeUserFromChatRoom(data[0], data[1]);
+                    instance.removeUserFromChatRoom(data[0], data[1]);
+                    instance.updateJoinedUsersForChatRoom(data[1]);
                     writeMessage(new Message(LEAVE_ROOM));
                     break;
                 }
                 case DELETE_ROOM: {
-                    ChatManager.getInstance().deleteRoom((String) msg.getData());
-                    ChatManager.getInstance().updateOnlineChatRooms();
+                    instance.deleteRoom((String) msg.getData());
+                    instance.updateOnlineChatRooms();
                     break;
                 }
                 case QUIT:
-                    ChatManager.getInstance().disconnectUser((String) msg.getData());
-                    ChatManager.getInstance().updateOnlineUsers();
+                    instance.disconnectUser((String) msg.getData());
+                    instance.updateOnlineUsers();
                     writeMessage(new Message(QUIT));
-                    break;
+                    return;
             }
         }
     }
