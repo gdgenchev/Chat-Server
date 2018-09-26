@@ -50,7 +50,7 @@ class ChatManager {
         return true;
     }
 
-    void disconnectUser(String username) {
+    synchronized void disconnectUser(String username) {
         connectedUsers.remove(username);
     }
 
@@ -103,7 +103,7 @@ class ChatManager {
     }
 
     String getChatRoomOwner(String chatRoomName) {
-        return  chatRooms.get(chatRoomName).getCreator().getUsername();
+        return chatRooms.get(chatRoomName).getCreator().getUsername();
     }
 
     synchronized void removeUserFromChatRoom(String username, String chatRoomName) {
@@ -111,7 +111,7 @@ class ChatManager {
         chatRoom.removeUserFromChatRoom(username);
     }
 
-    void deleteRoom(String roomName) {
+    synchronized void deleteRoom(String roomName) {
         chatRooms.get(roomName).notifyUsersForDelete();
         chatRooms.remove(roomName);
     }
