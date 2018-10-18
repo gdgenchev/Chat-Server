@@ -10,7 +10,7 @@ Programming:
          to all the receivers, which are responsible
          for updating the UI.
     5. Logging with log4j
-    6. Future: chat history for a chat room
+    6. Chat History for chat rooms
     
   
 ![ScreenShot](/image/img.png)
