@@ -40,9 +40,12 @@ public class ChatRoomController {
                         MessageType.DELETE_ROOM, chatRoomView.getChatRoomName())));
 
         this.chatRoomView.addSendListener(actionEvent -> {
-            String[] toSend = {client.getUsername(), client.getChatRoom(),
-                    chatRoomView.getSendMessageTextArea().getText()};
-            chatRoomView.getReceivedMessagesTextArea().append(toSend[0] + ": " + toSend[2] + "\n");
+            String[] toSend = {
+                    client.getUsername(),
+                    client.getChatRoom(),
+                    chatRoomView.getSendMessageTextArea()
+                                .getText()
+            };
             client.writeMessage(new Message(MessageType.SEND_GROUP, toSend));
         });
     }

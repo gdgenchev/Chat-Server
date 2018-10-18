@@ -26,10 +26,19 @@ class PrivateChatController {
         receiverBroadcaster.addReceiver(new PrivateChatReceiver(client, chatView, receiverBroadcaster));
         receiverBroadcaster.start();
 
-        //Add listeners
+        //Lambda listeners
+        this.chatView.addCreateChatRoomListener(listener-> {
+            String[] data = {client.getUsername(),chatView.getChatRoomNameTextField()};
+            client.writeMessage(new Message(MessageType.CREATE, data));
+        });
+
+        this.chatView.addJoinChatRoomListener(listener-> {
+            String[] data = {client.getUsername(),chatView.getChatRoomNameTextField()};
+            client.writeMessage(new Message(MessageType.JOIN, data));
+        });
+
+        //Private listeners
         this.chatView.addSendListener(new SendActionListener());
-        this.chatView.addCreateChatRoomListener(new CreateChatRoomListener());
-        this.chatView.addJoinChatRoomListener(new JoinChatRoomListener());
         this.chatView.addWindowListener(new CloseMinimizeWindowListener());
         this.chatView.addOnlineUsersListener(new OnClickOnlineUsersListener());
         this.chatView.addOnlineChatRoomsListener(new OnClickOnlineChatRoomsListener());
@@ -37,7 +46,7 @@ class PrivateChatController {
 
     private String getTextOnClickFromTextArea(JTextArea textArea) {
         try {
-            int line = textArea.getLineOfOffset( textArea.getCaretPosition() );
+            int line = textArea.getLineOfOffset(textArea.getCaretPosition() );
             int start = textArea.getLineStartOffset( line );
             int end = textArea.getLineEndOffset( line );
             return textArea.getDocument().getText(start, end - start);
@@ -52,7 +61,6 @@ class PrivateChatController {
      *
      */
     private class CloseMinimizeWindowListener extends WindowAdapter {
-
         @Override
         public void windowClosing(WindowEvent e) {
             client.writeMessage(new Message(MessageType.QUIT,client.getUsername()));
@@ -66,7 +74,6 @@ class PrivateChatController {
     }
 
     private class OnClickOnlineUsersListener extends MouseAdapter {
-
         @Override
         public void mouseClicked(MouseEvent e) {
             JTextArea textArea = chatView.getOnlineUsersTextArea();
@@ -78,7 +85,6 @@ class PrivateChatController {
     }
 
     private class OnClickOnlineChatRoomsListener extends MouseAdapter {
-
         @Override
         public void mouseClicked(MouseEvent e) {
             JTextArea onlineChatRoomsTextArea = chatView.getOnlineChatRoomsTextArea();
@@ -90,7 +96,6 @@ class PrivateChatController {
     }
 
     private class SendActionListener implements ActionListener {
-
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             if (client.getUsername().equals(chatView.getReceiver())) {
@@ -98,13 +103,10 @@ class PrivateChatController {
                 chatView.getSendMessageTextArea().setText("");
                 return;
             }
+
             String message = chatView.getSendMessageTextArea().getText();
             if (!message.isEmpty()) {
-                //Show sent message, only if the receiver is online
-                if (chatView.getOnlineUsersTextArea().getText().contains(chatView.getReceiver())) {
-                    chatView.getReceivedMessagesTextArea()
-                            .append(client.getUsername() + ": " + message + "\n");
-                } else {
+                if (!chatView.getOnlineUsersTextArea().getText().contains(chatView.getReceiver())) {
                     chatView.showDialog("User isn't online!", DialogType.ERROR);
                     return;
                 }
@@ -112,24 +114,6 @@ class PrivateChatController {
                 client.writeMessage(new Message(MessageType.SEND_PRIVATE, data));
                 chatView.getSendMessageTextArea().setText("");
             }
-        }
-    }
-
-    private class CreateChatRoomListener implements ActionListener {
-
-        @Override
-        public void actionPerformed(ActionEvent actionEvent) {
-            String[] data = {client.getUsername(),chatView.getChatRoomNameTextField()};
-            client.writeMessage(new Message(MessageType.CREATE, data));
-        }
-    }
-
-    private class JoinChatRoomListener implements ActionListener {
-
-        @Override
-        public void actionPerformed(ActionEvent actionEvent) {
-            String[] data = {client.getUsername(),chatView.getChatRoomNameTextField()};
-            client.writeMessage(new Message(MessageType.JOIN, data));
         }
     }
 }

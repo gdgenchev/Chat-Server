@@ -21,16 +21,15 @@ public class ChatRoomReceiver implements Receiver {
         if (msg != null) {
             switch (msg.getType()) {
                 case SEND_GROUP:
-                    String[] data = (String[]) msg.getData();
-                    chatRoomView
-                            .getReceivedMessagesTextArea()
-                            .append(data[0] + ": " + data[1] + "\n");
+                    String data = (String) msg.getData();
+                    chatRoomView.getReceivedMessagesTextArea()
+                                .append(data + "\n");
                     break;
                 case LEAVE_ROOM:
                     chatRoomView.setVisible(false);
                     break;
                 case JOINED_USERS:
-                    String joinedUsers = (String)msg.getData();
+                    String joinedUsers = (String) msg.getData();
                     if (joinedUsers.isEmpty()) {
                         chatRoomView.getOnlineUsersTextArea().setText("No online users");
                     } else {

@@ -113,7 +113,7 @@
             <properties>
               <font size="18" style="1"/>
               <foreground color="-4500604"/>
-              <text value="Chat History"/>
+              <text value="Received Messages"/>
             </properties>
           </component>
           <scrollpane id="82d24" binding="receivedMessagesScrollPane">
