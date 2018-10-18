@@ -1,7 +1,6 @@
 package bg.chat.server;
 
 import bg.chat.common.Message;
-import bg.chat.server.exceptions.NonExistentChatRoomException;
 import bg.chat.server.exceptions.UserAlreadyInChatRoomException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,17 +26,17 @@ public class SocketHandlingThread extends Thread {
             objectInputStream = new ObjectInputStream(socket.getInputStream());
             objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
         } catch (IOException e) {
-            logger.warn("Exception thrown while writing constructing the SocketHandlingThread");
+            logger.warn("Exception thrown while constructing the SocketHandlingThread", e);
         }
     }
 
-    synchronized void writeMessage(Message msg) {
+    void writeMessage(Message msg) {
         try {
             this.objectOutputStream.writeObject(msg);
             this.objectOutputStream.flush();
             logger.info("Server sent message " + msg.getType() + " to " + loggedInUser);
         } catch (IOException e) {
-            logger.warn("Exception thrown while writing to client");
+            logger.warn("Exception thrown while writing to client", e);
         }
     }
 
@@ -47,7 +46,7 @@ public class SocketHandlingThread extends Thread {
             logger.info("Server received a message from "  + loggedInUser + ": " + msg.getType());
             return msg;
         } catch (IOException | ClassNotFoundException e) {
-            logger.warn("Exception thrown while reading a message");
+            logger.warn("Exception thrown while reading a message", e);
         }
         return null;
     }
@@ -83,7 +82,6 @@ public class SocketHandlingThread extends Thread {
                 }
                 case SEND_GROUP: {
                     String[] data = (String[]) msg.getData();
-                    System.out.println(Arrays.toString(data));
                     instance.sendMessageInChatRoom(data[0], data[1], data[2]);
                     break;
                 }
@@ -105,8 +103,6 @@ public class SocketHandlingThread extends Thread {
                     String chatRoomName = data[1];
                     try {
                         if (instance.joinChatRoom(username, chatRoomName)) {
-                            String[] dataToSend = {ChatManager.getInstance().getChatRoomOwner(chatRoomName), chatRoomName};
-                            writeMessage(new Message(JOIN_SUCCESS, dataToSend));
                             instance.updateJoinedUsersForChatRoom(data[1]);
                         } else {
                             logger.info("Client tried to join a non-existent chat room");

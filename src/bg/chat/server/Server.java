@@ -18,7 +18,8 @@ public class Server {
                 new SocketHandlingThread(clientSocket).start();
             }
         } catch (IOException e) {
-            logger.warn("Exception thrown while accepting a client");
+            e.printStackTrace();
+            logger.warn("Exception thrown while accepting a client", e);
         }
     }
 }

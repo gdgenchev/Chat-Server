@@ -11,17 +11,19 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class ChatRoom {
+class ChatRoom {
     private String name;
     private User creator;
     private Map<String, User> joinedUsers;
     private static final Logger logger = LogManager.getLogger("Chat Room Manager");
+    private String chatHistory;
 
     ChatRoom(User creator, String name) {
         this.creator = creator;
         this.name = name;
         this.joinedUsers = new HashMap<>();
         this.joinedUsers.put(creator.getUsername(), creator);
+        System.out.println(creator.getUsername());
     }
 
     void addUser(User user) throws UserAlreadyInChatRoomException {
@@ -31,12 +33,9 @@ public class ChatRoom {
         joinedUsers.put(user.getUsername(), user);
     }
 
-    void broadcastMessage(String sender, String message) {
+    void broadcastMessage(String message) {
         for (User user : joinedUsers.values()) {
-            if (!user.getUsername().equals(sender)) {
-                String[] toSend = {sender, message};
-                user.getSocket().writeMessage(new Message(MessageType.SEND_GROUP, toSend));
-            }
+            user.getSocket().writeMessage(new Message(MessageType.SEND_GROUP, message));
         }
     }
 
@@ -62,7 +61,11 @@ public class ChatRoom {
         return creator;
     }
 
-    public void notifyUsersForDelete() {
+    String getName() {
+        return name;
+    }
+
+    void notifyUsersForDelete() {
         for (User user : joinedUsers.values()) {
             user.getSocket().writeMessage(new Message(MessageType.LEAVE_ROOM));
         }

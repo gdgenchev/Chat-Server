@@ -9,10 +9,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static bg.chat.common.MessageType.JOIN_SUCCESS;
+
 class ChatManager {
     private static ChatManager instance = null;
     private Map<String, User>  connectedUsers;
     private Map<String, ChatRoom> chatRooms;
+
+    private FileService fileService;
 
     private ChatManager() {
         connectedUsers = new HashMap<>();
@@ -70,6 +74,7 @@ class ChatManager {
             return false;
         }
         chatRooms.put(chatRoomName,chatRoom);
+        FileService.createFile(chatRoomName);
         return true;
     }
 
@@ -78,14 +83,22 @@ class ChatManager {
         User joiner = connectedUsers.get(user);
         if (chatRooms.containsKey(chatRoomName)) {
             chatRooms.get(chatRoomName).addUser(joiner);
+            String[] dataToSend = {ChatManager.getInstance().getChatRoomOwner(chatRoomName), chatRoomName};
+            joiner.getSocket().writeMessage(new Message(JOIN_SUCCESS, dataToSend));
+            joiner.getSocket().writeMessage(
+                    new Message(MessageType.SEND_GROUP,
+                            FileService.getChatRoomHistory(chatRoomName)));
+
             return true;
         }
+
         return false;
     }
 
     synchronized void sendMessageInChatRoom(String sender, String chatRoomName, String message) {
         ChatRoom chatRoom = chatRooms.get(chatRoomName);
-        chatRoom.broadcastMessage(sender, message);
+        chatRoom.broadcastMessage(sender + ": " + message);
+        FileService.writeMessageToFile(chatRoomName, sender + ":" + message + "\n");
     }
 
     synchronized void updateOnlineChatRooms() {
@@ -114,6 +127,7 @@ class ChatManager {
     synchronized void deleteRoom(String roomName) {
         chatRooms.get(roomName).notifyUsersForDelete();
         chatRooms.remove(roomName);
+        FileService.deleteFile(roomName);
     }
 
     synchronized void updateJoinedUsersForChatRoom(String chatRoomName) {
