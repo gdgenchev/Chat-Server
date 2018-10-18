@@ -11,6 +11,3 @@ Programming:
          for updating the UI.
     5. Logging with log4j
     6. Chat History for chat rooms
-    
-  
-![ScreenShot](/image/img.png)
