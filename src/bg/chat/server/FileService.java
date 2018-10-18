@@ -31,10 +31,14 @@ class FileService {
         {
             StringBuilder chatHistory = new StringBuilder();
             String line;
+            boolean has = false;
             while ((line = reader.readLine()) != null) {
                 chatHistory.append(line).append("\n");
+                has = true;
             }
-            chatHistory.deleteCharAt(chatHistory.length() - 1); // remove last new line
+            if (has) {
+                chatHistory.deleteCharAt(chatHistory.length() - 1); // remove last new line
+            }
             return chatHistory.toString();
         } catch (IOException e) {
             e.printStackTrace();
