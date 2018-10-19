@@ -82,13 +82,16 @@ class ChatManager {
             throws UserAlreadyInChatRoomException {
         User joiner = connectedUsers.get(user);
         if (chatRooms.containsKey(chatRoomName)) {
-            chatRooms.get(chatRoomName).addUser(joiner);
-            String[] dataToSend = {ChatManager.getInstance().getChatRoomOwner(chatRoomName), chatRoomName};
+            ChatRoom chatRoom = chatRooms.get(chatRoomName);
+            chatRoom.addUser(joiner);
+            String[] dataToSend = {
+                    chatRoom.getCreator().getUsername(),
+                    chatRoomName
+            };
             joiner.getSocket().writeMessage(new Message(JOIN_SUCCESS, dataToSend));
-            joiner.getSocket().writeMessage(
-                    new Message(MessageType.SEND_GROUP,
-                            FileService.getChatRoomHistory(chatRoomName)));
-
+            joiner.getSocket().writeMessage(new Message(
+                    MessageType.SEND_GROUP,
+                    chatRoom.getHistory()));
             return true;
         }
 
@@ -97,8 +100,7 @@ class ChatManager {
 
     synchronized void sendMessageInChatRoom(String sender, String chatRoomName, String message) {
         ChatRoom chatRoom = chatRooms.get(chatRoomName);
-        chatRoom.broadcastMessage(sender + ": " + message);
-        FileService.writeMessageToFile(chatRoomName, sender + ":" + message + "\n");
+        chatRoom.broadcastMessage(sender, message);
     }
 
     synchronized void updateOnlineChatRooms() {
@@ -108,10 +110,9 @@ class ChatManager {
 
     private void broadcastOnlineChatRoomNames(Set<String> chatRoomNames) {
         for (User user : connectedUsers.values()) {
-            user.getSocket().writeMessage(
-                    new Message(
-                            MessageType.LIST_CHAT_ROOMS,
-                            String.join("\n", chatRoomNames)));
+            user.getSocket().writeMessage(new Message(
+                    MessageType.LIST_CHAT_ROOMS,
+                    String.join("\n", chatRoomNames)));
         }
     }
 
@@ -125,9 +126,8 @@ class ChatManager {
     }
 
     synchronized void deleteRoom(String roomName) {
-        chatRooms.get(roomName).notifyUsersForDelete();
+        chatRooms.get(roomName).delete();
         chatRooms.remove(roomName);
-        FileService.deleteFile(roomName);
     }
 
     synchronized void updateJoinedUsersForChatRoom(String chatRoomName) {
