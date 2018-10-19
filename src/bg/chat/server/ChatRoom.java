@@ -16,7 +16,6 @@ class ChatRoom {
     private User creator;
     private Map<String, User> joinedUsers;
     private static final Logger logger = LogManager.getLogger("Chat Room Manager");
-    private String chatHistory;
 
     ChatRoom(User creator, String name) {
         this.creator = creator;
@@ -33,10 +32,12 @@ class ChatRoom {
         joinedUsers.put(user.getUsername(), user);
     }
 
-    void broadcastMessage(String message) {
+    void broadcastMessage(String sender, String message) {
+        String msgToSend = sender + ": " + message;
         for (User user : joinedUsers.values()) {
-            user.getSocket().writeMessage(new Message(MessageType.SEND_GROUP, message));
+            user.getSocket().writeMessage(new Message(MessageType.SEND_GROUP, msgToSend));
         }
+        FileService.writeMessageToFile(this.name, msgToSend + "\n");
     }
 
     void broadcastJoinedUsers() {
@@ -65,9 +66,16 @@ class ChatRoom {
         return name;
     }
 
-    void notifyUsersForDelete() {
+    void delete() {
+        //Notify users
         for (User user : joinedUsers.values()) {
             user.getSocket().writeMessage(new Message(MessageType.LEAVE_ROOM));
         }
+
+        FileService.deleteFile(this.name);
+    }
+
+    String getHistory() {
+       return FileService.getChatRoomHistory(this.name);
     }
 }
