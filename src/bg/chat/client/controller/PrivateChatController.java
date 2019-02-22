@@ -61,18 +61,19 @@ class PrivateChatController {
         }
     }
 
-    private class OnClickOnlineUsersListener extends MouseAdapter {
-        private String getTextOnClickFromTextArea(JTextArea textArea) {
-            try {
-                int line = textArea.getLineOfOffset(textArea.getCaretPosition() );
-                int start = textArea.getLineStartOffset( line );
-                int end = textArea.getLineEndOffset( line );
-                return textArea.getDocument().getText(start, end - start);
-            } catch (BadLocationException e1) {
-                e1.printStackTrace();
-            }
-            return null;
+    private String getTextOnClickFromTextArea(JTextArea textArea) {
+        try {
+            int line = textArea.getLineOfOffset(textArea.getCaretPosition() );
+            int start = textArea.getLineStartOffset( line );
+            int end = textArea.getLineEndOffset( line );
+            return textArea.getDocument().getText(start, end - start);
+        } catch (BadLocationException e1) {
+            e1.printStackTrace();
         }
+        return null;
+    }
+
+    private class OnClickOnlineUsersListener extends MouseAdapter {
         @Override
         public void mouseClicked(MouseEvent e) {
             JTextArea textArea = chatView.getOnlineUsersTextArea();
